@@ -7,8 +7,14 @@ from modules.profanity import Profanity
 from static.rooms import ChatRooms
 
 from dotenv import load_dotenv
-load_dotenv()
 
+# Ensure Environmental variables are set
+load_dotenv()
+assert os.getenv('CLIENT_SECRET')
+assert os.getenv('MC_SERVER_IP')
+assert os.getenv('MC_SERVER_PORT')
+
+# Create and Initialize() a discord Client
 client = discord.Client()
 
 
@@ -43,7 +49,7 @@ async def on_message(message):
         if message.content.startswith('!online') or message.content.startswith('!list'):
 
             # Ping the server to query player info
-            ping = mcping.ping(os.getenv('SERVER_IP'))
+            ping = mcping.ping(os.getenv('MC_SERVER_IP'), int(os.getenv('MC_SERVER_PORT')))
 
             # Change the <Players> to <Strings>
             names = []
