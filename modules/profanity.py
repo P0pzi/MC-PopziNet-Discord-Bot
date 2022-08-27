@@ -42,7 +42,6 @@ class Profanity:
         self.author = message.author
 
         self.message_words = [word.lower() for word in self.message.content.split(' ')]
-        print(self.message_words)
         self.bad_words = [word.lower() for word in badwords]
 
         self.checked = False
