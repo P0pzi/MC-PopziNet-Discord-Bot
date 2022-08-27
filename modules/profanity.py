@@ -1,3 +1,4 @@
+import random
 from string import Template
 
 from static.admins import Admins
@@ -5,13 +6,17 @@ from static.rooms import ChatRooms
 
 badwords = open("./static/badwords.txt", "r").read().splitlines()
 
-badwords_message = "Please keep the chat clean ($bad_words), $followup"
+badwords_message = "Please keep the chat clean ($bad_words), else $followup. \N{SERIOUS FACE WITH SYMBOLS COVERING MOUTH}"
 singular_bad_word = "Bad word: $word"
 multiple_bad_words = "Bad words: $words"
 
-# TODO Add more random funny followups
 funny_followups = [
-    'else I\'ll rip your friggin\' arms off. \N{SERIOUS FACE WITH SYMBOLS COVERING MOUTH}'
+    "I'll rip your friggin' arms off.",
+    "I'll hang you by your toenails on the clothes line.",
+    "I'll make your body stand still and your head do a 360.",
+    "I'll put you on a rocket and shoot you into outerspace.",
+    "I'll have your mom do my laundry.",
+    "you'll get to sleep without socks on tonight."
 ]
 
 
@@ -83,8 +88,7 @@ class Profanity:
         else:
             words = ""
 
-        # TODO Get random funny follow up
-        followup = funny_followups[0]
+        followup = random.choice(funny_followups)
 
         return Template(badwords_message).substitute(
             bad_words=words,
