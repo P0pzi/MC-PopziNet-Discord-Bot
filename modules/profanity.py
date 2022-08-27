@@ -14,7 +14,7 @@ funny_followups = [
     "I'll rip your friggin' arms off",
     "I'll hang you by your toenails on the clothes line",
     "I'll make your body stand still and your head do a 360",
-    "I'll put you on a rocket and shoot you into outerspace",
+    "I'll put you on a rocket and shoot you into outer space",
     "I'll have your mom do my laundry",
     "you'll get to sleep without socks on tonight"
 ]

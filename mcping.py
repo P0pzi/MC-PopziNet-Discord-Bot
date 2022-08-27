@@ -81,7 +81,7 @@ def ping(ip, port=25565):
             if length < 0:
                 raise ValueError('negative length read')
             else:
-                raise ValueError('invalid response recieved from socket')
+                raise ValueError('invalid response received from socket')
 
         sock.recv(1)  # packet type, 0 for pings
         length = read_var_int()  # string length
@@ -89,7 +89,7 @@ def ping(ip, port=25565):
         while len(data) != length:
             chunk = sock.recv(length - len(data))
             if not chunk:
-                raise ValueError('connection abborted')
+                raise ValueError('connection aborted')
 
             data += chunk
 

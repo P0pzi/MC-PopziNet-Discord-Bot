@@ -38,12 +38,12 @@ async def on_message(message):
 
     # If it was a message sent in the #suggestions room
     # (Room ID 705786147200303104) add reactions to it
-    if message.channel.id == ChatRooms.SUGGESTIONS:
+    if message.channel.id == ChatRooms.SUGGESTIONS.value:
         await message.add_reaction('\N{THUMBS UP SIGN}')
         await message.add_reaction('\N{THUMBS DOWN SIGN}')
 
     # If a message is sent to our ingame channel
-    if message.channel.id == ChatRooms.INGAME:
+    if message.channel.id == ChatRooms.INGAME.value:
 
         # If the message starts with !online or !list
         if message.content.startswith('!online') or message.content.startswith('!list'):
@@ -52,9 +52,7 @@ async def on_message(message):
             ping = mcping.ping(os.getenv('MC_SERVER_IP'), int(os.getenv('MC_SERVER_PORT')))
 
             # Change the <Players> to <Strings>
-            names = []
-            for player in ping.players:
-                names.append(player.name)
+            names = [player.name for player in ping.players]
 
             # Create an embed message and send it
             embedded = discord.Embed(
@@ -64,7 +62,7 @@ async def on_message(message):
             await message.channel.send(embed=embedded)
 
     # If a message is sent to our screenshots channel
-    if message.channel.id == ChatRooms.SCREENSHOTS:
+    if message.channel.id == ChatRooms.SCREENSHOTS.value:
         # If it's not got any screenshots in it
         if not message.attachments:
             await message.delete()
