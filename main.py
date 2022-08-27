@@ -2,10 +2,8 @@ import os
 import discord
 import mcping
 
-# Create and Initialize() a discord Client
 from modules.profanity import Profanity
 from static.rooms import ChatRooms
-
 from dotenv import load_dotenv
 
 # Ensure Environmental variables are set
@@ -17,6 +15,9 @@ assert os.getenv('MC_SERVER_PORT')
 # Create and Initialize() a discord Client
 client = discord.Client()
 
+# Initialize profanity module
+profanity = Profanity()
+
 
 # If an on_ready() event is called, say we're ready
 @client.event
@@ -27,12 +28,15 @@ async def on_ready():
 # If a on_message() event is called, figure out what to do
 @client.event
 async def on_message(message):
+
     # If the person who sent the message is us
     if message.author == client.user:
         return  # Return nothing. Ignore it.
 
-    profanity = Profanity(message)
-    if profanity.has_profanity:
+    # Update the current message for the profanity module to scan
+    profanity.current_msg = message
+
+    if profanity.current_msg.is_profane:
         await message.delete()
         await message.author.send(profanity.get_message_reply())
 
@@ -70,7 +74,6 @@ async def on_message(message):
                 'Please keep this channel to screenshots only, or I will hunt you down ' +
                 'and feast on your body. \N{POULTRY LEG}\N{FORK AND KNIFE}'
             )
-
 
 # Login & Run our client using our secret password
 client.run(os.getenv('CLIENT_SECRET'))
