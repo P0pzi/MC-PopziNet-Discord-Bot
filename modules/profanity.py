@@ -5,7 +5,7 @@ from string import Template
 
 from static.admins import Admins
 from static.rooms import ChatRooms
-from static.currentMessage import CurrentMessage
+from models.message import Message
 
 bad_words = open("./static/badwords.txt", "r").read().splitlines()
 bad_words = [word.lower() for word in bad_words]
@@ -115,7 +115,8 @@ class Profanity:
     def current_msg(self, discord_message):
         if type(discord_message) is not discord.Message:
             raise TypeError("Current message is not of a discord type")
-        self._current_message = CurrentMessage()
+
+        self._current_message = Message()
         self._current_message.VALUE = discord_message
         self._current_message.WORDS = [word for word in discord_message.content.split(' ')]
         self._current_message.WORDS_LOWER = [word.lower() for word in self._current_message.WORDS]
