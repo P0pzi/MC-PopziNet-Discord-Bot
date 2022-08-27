@@ -59,7 +59,7 @@ class Profanity:
         elif bad_word.endswith("*"):
             return any(needle_word.startswith(fixed_bad_word) for needle_word in self.message_words)
 
-        return any(needle_word is fixed_bad_word for needle_word in self.message_words)
+        return any(needle_word == fixed_bad_word for needle_word in self.message_words)
 
     def check(self):
         if self.channel.id in Profanity.IGNORE_ROOMS and self.channel.id != ChatRooms.MOD_DEVELOPMENT_BOT.value:
