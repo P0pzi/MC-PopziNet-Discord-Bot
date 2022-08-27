@@ -3,14 +3,13 @@ import discord
 import mcping
 
 # Create and Initialize() a discord Client
+from modules.profanity import Profanity
 from static.rooms import ChatRooms
 
 from dotenv import load_dotenv
 load_dotenv()
 
 client = discord.Client()
-
-badwords = open("./static/badwords.txt", "r").read().splitlines()
 
 
 # If an on_ready() event is called, say we're ready
@@ -26,14 +25,10 @@ async def on_message(message):
     if message.author == client.user:
         return  # Return nothing. Ignore it.
 
-    # If it contains profanity
-    if any(word in message.content.split(' ') for word in badwords):
-        word = [word for word in badwords if word in message.content.split(' ')]
+    profanity = Profanity(message)
+    if profanity.has_profanity:
         await message.delete()
-        await message.author.send(
-            'Please keep the chat clean (Bad word: __{0}__), else I\'ll rip your friggin\' arms off. \N{SERIOUS FACE WITH SYMBOLS COVERING MOUTH}'.format(
-                word[0])
-        )
+        await message.author.send(profanity.get_message_reply())
 
     # If it was a message sent in the #suggestions room
     # (Room ID 705786147200303104) add reactions to it
