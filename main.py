@@ -2,14 +2,21 @@ import os
 import discord
 import mcping
 
-# Create and Initialize() a discord Client
 from modules.profanity import Profanity
 from static.rooms import ChatRooms
-
 from dotenv import load_dotenv
-load_dotenv()
 
+# Ensure Environmental variables are set
+load_dotenv()
+assert os.getenv('CLIENT_SECRET')
+assert os.getenv('MC_SERVER_IP')
+assert os.getenv('MC_SERVER_PORT')
+
+# Create and Initialize() a discord Client
 client = discord.Client()
+
+# Initialize profanity module
+profanity = Profanity()
 
 
 # If an on_ready() event is called, say we're ready
@@ -21,34 +28,35 @@ async def on_ready():
 # If a on_message() event is called, figure out what to do
 @client.event
 async def on_message(message):
+
     # If the person who sent the message is us
     if message.author == client.user:
         return  # Return nothing. Ignore it.
 
-    profanity = Profanity(message)
-    if profanity.has_profanity:
+    # Update the current message for the profanity module to scan
+    profanity.current_msg = message
+
+    if profanity.current_msg.is_profane:
         await message.delete()
         await message.author.send(profanity.get_message_reply())
 
     # If it was a message sent in the #suggestions room
     # (Room ID 705786147200303104) add reactions to it
-    if message.channel.id == ChatRooms.SUGGESTIONS:
+    if message.channel.id == ChatRooms.SUGGESTIONS.value:
         await message.add_reaction('\N{THUMBS UP SIGN}')
         await message.add_reaction('\N{THUMBS DOWN SIGN}')
 
     # If a message is sent to our ingame channel
-    if message.channel.id == ChatRooms.INGAME:
+    if message.channel.id == ChatRooms.INGAME.value:
 
         # If the message starts with !online or !list
         if message.content.startswith('!online') or message.content.startswith('!list'):
 
             # Ping the server to query player info
-            ping = mcping.ping(os.getenv('SERVER_IP'))
+            ping = mcping.ping(os.getenv('MC_SERVER_IP'), int(os.getenv('MC_SERVER_PORT')))
 
             # Change the <Players> to <Strings>
-            names = []
-            for player in ping.players:
-                names.append(player.name)
+            names = [player.name for player in ping.players]
 
             # Create an embed message and send it
             embedded = discord.Embed(
@@ -58,7 +66,7 @@ async def on_message(message):
             await message.channel.send(embed=embedded)
 
     # If a message is sent to our screenshots channel
-    if message.channel.id == ChatRooms.SCREENSHOTS:
+    if message.channel.id == ChatRooms.SCREENSHOTS.value:
         # If it's not got any screenshots in it
         if not message.attachments:
             await message.delete()
@@ -66,7 +74,6 @@ async def on_message(message):
                 'Please keep this channel to screenshots only, or I will hunt you down ' +
                 'and feast on your body. \N{POULTRY LEG}\N{FORK AND KNIFE}'
             )
-
 
 # Login & Run our client using our secret password
 client.run(os.getenv('CLIENT_SECRET'))
