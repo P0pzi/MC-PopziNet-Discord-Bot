@@ -10,7 +10,7 @@ load_dotenv()
 
 client = discord.Client()
 
-badwords = open("/opt/scripts/discord_bot/badwords.txt", "r").read().splitlines()
+badwords = open("./static/badwords.txt", "r").read().splitlines()
 
 
 # If an on_ready() event is called, say we're ready
