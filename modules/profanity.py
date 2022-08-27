@@ -44,22 +44,24 @@ class Profanity:
     def __init__(self):
         self._current_message = None
 
-    def is_bad_word_in_message(self, bad_word):
+    @staticmethod
+    def is_bad_word_in_message(bad_word, message_words):
         """
         Determines if a bad word is contained in the current message
         :param bad_word: An entry from badwords.txt
-        :return: list or string
+        :param message_words
+        :return: boolean
         """
         fixed_bad_word = bad_word.removeprefix("*").removesuffix("*")
 
         if bad_word.startswith("*") and bad_word.endswith("*"):
-            return any(fixed_bad_word in needle_word for needle_word in self.current_msg.WORDS_LOWER)
+            return any(fixed_bad_word in needle_word for needle_word in message_words)
         elif bad_word.startswith("*"):
-            return any(needle_word.endswith(fixed_bad_word) for needle_word in self.current_msg.WORDS_LOWER)
+            return any(needle_word.endswith(fixed_bad_word) for needle_word in message_words)
         elif bad_word.endswith("*"):
-            return any(needle_word.startswith(fixed_bad_word) for needle_word in self.current_msg.WORDS_LOWER)
+            return any(needle_word.startswith(fixed_bad_word) for needle_word in message_words)
 
-        return any(needle_word == fixed_bad_word for needle_word in self.current_msg.WORDS_LOWER)
+        return any(needle_word == fixed_bad_word for needle_word in message_words)
 
     def check(self):
         """
@@ -72,15 +74,20 @@ class Profanity:
             return
 
         if self.current_msg.AUTHOR.id in Profanity.IGNORE_USERS and \
-                self.current_msg.AUTHOR.id != ChatRooms.MOD_DEVELOPMENT_BOT.value:
+                self.current_msg.CHANNEL.id != ChatRooms.MOD_DEVELOPMENT_BOT.value:
             return
 
         # Remove dupes by making a set first, then turning it into a list again
-        self.current_msg.BAD_WORDS = list(
+        self.current_msg.BAD_WORDS = Profanity.get_profanity(self.current_msg.WORDS_LOWER)
+
+    @staticmethod
+    def get_profanity(message_words):
+        # Remove dupes by making a set first, then turning it into a list again
+        return list(
             set(
                 [
                     bad_word.removeprefix("*").removesuffix("*") for bad_word in bad_words
-                    if self.is_bad_word_in_message(bad_word)
+                    if Profanity.is_bad_word_in_message(bad_word, message_words)
                 ]
             )
         )
@@ -88,7 +95,7 @@ class Profanity:
     def get_message_reply(self):
         """
         Generates a reply when bad words are detected in the current message
-        :return:
+        :return: string
         """
         if self.current_msg.bad_word_count <= 0:
             # Something is wrong with the code if someone sees this.

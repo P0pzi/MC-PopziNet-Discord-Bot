@@ -91,6 +91,7 @@ Fukken
 Fukker
 Fukkin
 g00k
+God-damned
 h00r
 h0ar
 h0re
@@ -140,12 +141,12 @@ Mutha Fukkah
 Mutha Fukker
 n1gr
 nastt
-nigger;
-nigur;
-niiger;
-niigr;
+nigger
+nigur
+niiger
+niigr
 orafis
-orgasim;
+orgasim
 orgasm
 orgasum
 oriface
@@ -311,6 +312,7 @@ jackoff
 wank
 whoar
 *whore
+*damn
 *dyke
 *fuck*
 *shit*
@@ -466,4 +468,3 @@ niggers
 rape
 raped
 suckmydick
-*fvck*

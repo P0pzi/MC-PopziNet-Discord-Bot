@@ -22,3 +22,27 @@ class Message:
     def is_profane(self):
         return self.bad_word_count > 0
 
+    @staticmethod
+    def cleanup_word(word):
+        replacements = {
+            "@": "a",
+            "$": "s",
+            "0": "o",
+            "3": "e",
+            "4": "a",
+            "+": "t",
+            "7": "t",
+            "?": "",
+            "!": "",
+            ".": "",
+            ",": "",
+        }
+
+        word = word.lower()
+        for char, replacement in replacements.items():
+            word = word.replace(char, replacement)
+        return word
+
+    @staticmethod
+    def split_message(message):
+        return [Message.cleanup_word(word) for word in message.split(' ')]
