@@ -7,7 +7,8 @@ from static.admins import Admins
 from static.rooms import ChatRooms
 from static.currentMessage import CurrentMessage
 
-badwords = open("./static/badwords.txt", "r").read().splitlines()
+bad_words = open("./static/badwords.txt", "r").read().splitlines()
+bad_words = [word.lower() for word in bad_words]
 
 badwords_message = "Please keep the chat clean ($bad_words), else $followup... \N{SERIOUS FACE WITH SYMBOLS COVERING MOUTH}"
 singular_bad_word = "Bad word: $word"
@@ -42,7 +43,6 @@ class Profanity:
     # Keep the last / current message in memory
     def __init__(self):
         self._current_message = None
-        self.bad_words = [word.lower() for word in badwords]
 
     def is_bad_word_in_message(self, bad_word):
         """
@@ -79,7 +79,7 @@ class Profanity:
         self.current_msg.BAD_WORDS = list(
             set(
                 [
-                    bad_word.removeprefix("*").removesuffix("*") for bad_word in self.bad_words
+                    bad_word.removeprefix("*").removesuffix("*") for bad_word in bad_words
                     if self.is_bad_word_in_message(bad_word)
                 ]
             )
