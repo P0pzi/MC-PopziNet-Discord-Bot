@@ -6,17 +6,17 @@ from static.rooms import ChatRooms
 
 badwords = open("./static/badwords.txt", "r").read().splitlines()
 
-badwords_message = "Please keep the chat clean ($bad_words), else $followup. \N{SERIOUS FACE WITH SYMBOLS COVERING MOUTH}"
+badwords_message = "Please keep the chat clean ($bad_words), else $followup... \N{SERIOUS FACE WITH SYMBOLS COVERING MOUTH}"
 singular_bad_word = "Bad word: $word"
 multiple_bad_words = "Bad words: $words"
 
 funny_followups = [
-    "I'll rip your friggin' arms off.",
-    "I'll hang you by your toenails on the clothes line.",
-    "I'll make your body stand still and your head do a 360.",
-    "I'll put you on a rocket and shoot you into outerspace.",
-    "I'll have your mom do my laundry.",
-    "you'll get to sleep without socks on tonight."
+    "I'll rip your friggin' arms off",
+    "I'll hang you by your toenails on the clothes line",
+    "I'll make your body stand still and your head do a 360",
+    "I'll put you on a rocket and shoot you into outerspace",
+    "I'll have your mom do my laundry",
+    "you'll get to sleep without socks on tonight"
 ]
 
 
@@ -42,6 +42,7 @@ class Profanity:
         self.author = message.author
 
         self.message_words = [word.lower() for word in self.message.content.split(' ')]
+        print(self.message_words)
         self.bad_words = [word.lower() for word in badwords]
 
         self.checked = False
@@ -50,13 +51,16 @@ class Profanity:
         self.check()
 
     def is_bad_word_in_message(self, bad_word):
+        fixed_bad_word = bad_word.removeprefix("*").removesuffix("*")
+
         if bad_word.startswith("*") and bad_word.endswith("*"):
-            return any(needle_word in bad_word for needle_word in self.message_words)
+            return any(fixed_bad_word in needle_word for needle_word in self.message_words)
         elif bad_word.startswith("*"):
-            return any(needle_word.endswith(bad_word) for needle_word in self.message_words)
+            return any(needle_word.endswith(fixed_bad_word) for needle_word in self.message_words)
         elif bad_word.endswith("*"):
-            return any(needle_word.startswith(bad_word) for needle_word in self.message_words)
-        return any(needle_word is bad_word for needle_word in self.message_words)
+            return any(needle_word.startswith(fixed_bad_word) for needle_word in self.message_words)
+
+        return any(needle_word is fixed_bad_word for needle_word in self.message_words)
 
     def check(self):
         if self.channel.id in Profanity.IGNORE_ROOMS and self.channel.id != ChatRooms.MOD_DEVELOPMENT_BOT.value:
@@ -69,7 +73,7 @@ class Profanity:
         self.profanity = list(
             set(
                 [
-                    bad_word for bad_word in self.bad_words
+                    bad_word.removeprefix("*").removesuffix("*") for bad_word in self.bad_words
                     if self.is_bad_word_in_message(bad_word)
                 ]
             )
