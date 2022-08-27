@@ -54,10 +54,10 @@ class Profanity:
         return any(needle_word is bad_word for needle_word in self.message_words)
 
     def check(self):
-        if self.channel.id in Profanity.IGNORE_ROOMS:
+        if self.channel.id in Profanity.IGNORE_ROOMS and self.channel.id != ChatRooms.MOD_DEVELOPMENT_BOT.value:
             return
 
-        if self.author.id in Profanity.IGNORE_USERS:
+        if self.author.id in Profanity.IGNORE_USERS and self.channel.id != ChatRooms.MOD_DEVELOPMENT_BOT.value:
             return
 
         # Remove dupes by making a set first, then turning it into a list again
