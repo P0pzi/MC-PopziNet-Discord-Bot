@@ -4,6 +4,7 @@ import base64
 import json
 import sys
 
+
 class Server:
     def __init__(self, data):
         self.description = data.get('description')
@@ -16,11 +17,12 @@ class Server:
         self.protocol = data['version']['protocol']
 
     def __str__(self):
-        return 'Server(description={!r}, icon={!r}, version={!r}, '\
-                'protocol={!r}, players={})'.format(
+        return 'Server(description={!r}, icon={!r}, version={!r}, ' \
+               'protocol={!r}, players={})'.format(
             self.description, bool(self.icon), self.version,
             self.protocol, self.players
         )
+
 
 class Players(list):
     def __init__(self, data):
@@ -32,6 +34,7 @@ class Players(list):
         return '[{}, online={}, max={}]'.format(
             ', '.join(str(x) for x in self), self.online, self.max
         )
+
 
 class Player:
     def __init__(self, data):
@@ -93,6 +96,7 @@ def ping(ip, port=25565):
         return Server(json.loads(data))
     finally:
         sock.close()
+
 
 if __name__ == '__main__':
     for sv in sys.argv[1:]:
