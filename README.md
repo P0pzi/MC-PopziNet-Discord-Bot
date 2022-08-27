@@ -4,12 +4,12 @@ The discord bot used by the Popzi.Net Minecraft discord channel
 
 ## Features
 * Smart Profanity Filter
-* Screenshot Channel Managemnet
+* Screenshot Channel Management
 * Suggestion Emojis
 * Online Listings
 
 ## Commands
-* `!list` | `!online` - Shows who's online currently when ran in the #ingame channel
+* `!list` | `!online` - Shows who are online currently when ran in the #ingame channel
 
 
 ## Setup
