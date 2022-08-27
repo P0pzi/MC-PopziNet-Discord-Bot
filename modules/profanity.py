@@ -66,7 +66,7 @@ class Profanity:
     def check(self):
         """
         Doesn't check messages coming from ignored rooms or users, and identifies bad words contained
-        in the current message.
+        in the current message. Always checks in MOD_DEVELOPMENT_BOT channel for development purposes
         :return: None
         """
         if self.current_msg.CHANNEL.id in Profanity.IGNORE_ROOMS and \
@@ -126,8 +126,7 @@ class Profanity:
         self._current_message = Message()
         self._current_message.VALUE = discord_message
         self._current_message.WORDS = [word for word in discord_message.content.split(' ')]
-        self._current_message.WORDS_LOWER = [word.lower() for word in self._current_message.WORDS]
-        self._current_message.WORDS_UPPER = [word.upper() for word in self._current_message.WORDS]
+        self._current_message.WORDS_LOWER = Message.split_message(discord_message.content)
         self._current_message.CHANNEL = discord_message.channel
         self._current_message.AUTHOR = discord_message.author
         self.check()

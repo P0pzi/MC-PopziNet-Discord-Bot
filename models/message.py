@@ -3,7 +3,6 @@ class Message:
 
     def __init__(self):
         self.WORDS = None
-        self.WORDS_UPPER = None
         self.WORDS_LOWER = None
         self.VALUE = None
         self.CHANNEL = None
