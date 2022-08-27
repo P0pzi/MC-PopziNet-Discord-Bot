@@ -44,6 +44,15 @@ class Profanity:
 
         self.check()
 
+    def is_bad_word_in_message(self, bad_word):
+        if bad_word.startswith("*") and bad_word.endswith("*"):
+            return any(needle_word in bad_word for needle_word in self.message_words)
+        elif bad_word.startswith("*"):
+            return any(needle_word.endswith(bad_word) for needle_word in self.message_words)
+        elif bad_word.endswith("*"):
+            return any(needle_word.startswith(bad_word) for needle_word in self.message_words)
+        return any(needle_word is bad_word for needle_word in self.message_words)
+
     def check(self):
         if self.channel.id in Profanity.IGNORE_ROOMS:
             return
@@ -52,7 +61,14 @@ class Profanity:
             return
 
         # Remove dupes by making a set first, then turning it into a list again
-        self.profanity = list(set([word for word in self.bad_words if word in self.message_words]))
+        self.profanity = list(
+            set(
+                [
+                    bad_word for bad_word in self.bad_words
+                    if self.is_bad_word_in_message(bad_word)
+                ]
+            )
+        )
         self.checked = True
 
     def get_message_reply(self):
