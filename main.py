@@ -1,10 +1,15 @@
+import os
 import discord
 import mcping
 
 # Create and Initialize() a discord Client
 from static.rooms import ChatRooms
 
+from dotenv import load_dotenv
+load_dotenv()
+
 client = discord.Client()
+
 badwords = open("/opt/scripts/discord_bot/badwords.txt", "r").read().splitlines()
 
 
@@ -43,7 +48,7 @@ async def on_message(message):
         if message.content.startswith('!online') or message.content.startswith('!list'):
 
             # Ping the server to query player info
-            ping = mcping.ping('127.0.0.1')
+            ping = mcping.ping(os.getenv('SERVER_IP'))
 
             # Change the <Players> to <Strings>
             names = []
@@ -69,4 +74,4 @@ async def on_message(message):
 
 
 # Login & Run our client using our secret password
-client.run('ODgyMjk5MzcyNTc3MTEyMDY1.YS5XUg.iEMOg_ePoL9RxYonyL3FeFiPSho')
+client.run(os.getenv('CLIENT_SECRET'))
