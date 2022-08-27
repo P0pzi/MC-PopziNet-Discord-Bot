@@ -1,0 +1,7 @@
+from enum import Enum
+
+
+class Admins(Enum):
+    POPZI = 193184033671348224
+    NOTLINXED = 608743140400300044
+    MRJAKKER = 360448003821010975
