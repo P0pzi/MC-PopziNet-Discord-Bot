@@ -6,6 +6,7 @@ from string import Template
 from helpers.message import split_cleanup_sentence
 from static.admins import Admins
 from static.rooms import ChatRooms
+from tests.mocks import MockMessage
 
 bad_words = open("./static/badwords.txt", "r").read().splitlines()
 bad_words = [word.lower() for word in bad_words]
@@ -57,7 +58,7 @@ class Profanity:
         cleaned_sentence_part = split_cleanup_sentence(lowercase_sentence)
         return list(set(cleaned_sentence_part))
 
-    def set_message(self, message: discord.Message) -> "Profanity":
+    def set_message(self, message: [discord.Message, MockMessage]) -> "Profanity":
         self.message = message
         return self
 
