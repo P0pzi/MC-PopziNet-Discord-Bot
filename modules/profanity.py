@@ -3,9 +3,10 @@ import discord
 
 from string import Template
 
+from helpers.message import split_cleanup_sentence
 from static.admins import Admins
 from static.rooms import ChatRooms
-from models.message import Message
+from tests.mocks import MockMessage
 
 bad_words = open("./static/badwords.txt", "r").read().splitlines()
 bad_words = [word.lower() for word in bad_words]
@@ -25,7 +26,6 @@ funny_followups = [
 
 
 class Profanity:
-
     # Chat won't be checked in these rooms
     IGNORE_ROOMS = [
         ChatRooms.MOD_CHAT.value,
@@ -36,76 +36,92 @@ class Profanity:
 
     # Chat won't be checked for these users
     IGNORE_USERS = [
-        # Add user ID's here.
-        # Admins are added automatically
-    ] + [admin.value for admin in Admins]
+                       # Add user ID's here.
+                       # Admins are added automatically
+                   ] + [admin.value for admin in Admins]
 
-    # Keep the last / current message in memory
     def __init__(self):
-        self._current_message = None
+        self.message = None
+        self.profanity = []
 
-    @staticmethod
-    def is_bad_word_in_message(bad_word, message_words):
-        """
-        Determines if a bad word is contained in the current message
-        :param bad_word: An entry from badwords.txt
-        :param message_words
-        :return: boolean
-        """
-        fixed_bad_word = bad_word.removeprefix("*").removesuffix("*")
+    @property
+    def profane_word_count(self) -> int:
+        return len(self.profanity)
 
-        if bad_word.startswith("*") and bad_word.endswith("*"):
-            return any(fixed_bad_word in needle_word for needle_word in message_words)
-        elif bad_word.startswith("*"):
-            return any(needle_word.endswith(fixed_bad_word) for needle_word in message_words)
-        elif bad_word.endswith("*"):
-            return any(needle_word.startswith(fixed_bad_word) for needle_word in message_words)
+    @property
+    def has_profane_words(self) -> bool:
+        return self.profane_word_count > 0
 
-        return any(needle_word == fixed_bad_word for needle_word in message_words)
+    @property
+    def unique_words(self) -> list:
+        lowercase_sentence = self.message.content.lower()
+        cleaned_sentence_part = split_cleanup_sentence(lowercase_sentence)
+        return list(set(cleaned_sentence_part))
 
-    def check(self):
+    def set_message(self, message: [discord.Message, MockMessage]) -> "Profanity":
+        self.message = message
+        return self
+
+    def reset(self) -> "Profanity":
+        self.message = None
+        self.profanity = []
+        return self
+
+    def check(self) -> None:
         """
         Doesn't check messages coming from ignored rooms or users, and identifies bad words contained
         in the current message. Always checks in MOD_DEVELOPMENT_BOT channel for development purposes
         :return: None
         """
-        if self.current_msg.CHANNEL.id in Profanity.IGNORE_ROOMS and \
-                self.current_msg.CHANNEL.id != ChatRooms.MOD_DEVELOPMENT_BOT.value:
+
+        if self.message.channel.id != ChatRooms.MOD_DEVELOPMENT_BOT.value and (
+                self.message.channel.id in Profanity.IGNORE_ROOMS
+                or self.message.author.id in Profanity.IGNORE_USERS
+        ):
             return
 
-        if self.current_msg.AUTHOR.id in Profanity.IGNORE_USERS and \
-                self.current_msg.CHANNEL.id != ChatRooms.MOD_DEVELOPMENT_BOT.value:
-            return
+        self.profanity = self.get_profanity()
 
-        # Remove dupes by making a set first, then turning it into a list again
-        self.current_msg.BAD_WORDS = Profanity.get_profanity(self.current_msg.WORDS_LOWER)
+    def get_profanity(self) -> list:
+        found_profanity = [
+            profane_word.removeprefix("*").removesuffix("*") for profane_word in bad_words
+            if self.is_profane_word_in_message(profane_word)
+        ]
 
-    @staticmethod
-    def get_profanity(message_words):
-        # Remove dupes by making a set first, then turning it into a list again
-        return list(
-            set(
-                [
-                    bad_word.removeprefix("*").removesuffix("*") for bad_word in bad_words
-                    if Profanity.is_bad_word_in_message(bad_word, message_words)
-                ]
-            )
-        )
+        return list(set(found_profanity))
 
-    def get_message_reply(self):
+    def is_profane_word_in_message(self, profane_word: str) -> bool:
+        """
+        Determines if a profane word is contained in a sentence
+        :param profane_word: A word that is considered profane
+        """
+
+        profane_word_without_asterisks = profane_word.removeprefix("*").removesuffix("*")
+
+        if profane_word.startswith("*") and profane_word.endswith("*"):
+            return any(profane_word_without_asterisks in word for word in self.unique_words)
+
+        elif profane_word.startswith("*"):
+            return any(word.endswith(profane_word_without_asterisks) for word in self.unique_words)
+
+        elif profane_word.endswith("*"):
+            return any(word.startswith(profane_word_without_asterisks) for word in self.unique_words)
+
+        return any(needle_word == profane_word_without_asterisks for needle_word in self.unique_words)
+
+    def get_message_reply(self) -> str:
         """
         Generates a reply when bad words are detected in the current message
-        :return: string
         """
-        if self.current_msg.bad_word_count <= 0:
+        if self.profane_word_count <= 0:
             # Something is wrong with the code if someone sees this.
             return "Your message is clean. Good job."
 
         words = ""
-        if self.current_msg.bad_word_count == 1:
-            words = Template(singular_bad_word).substitute(word=self.current_msg.BAD_WORDS[0])
-        elif self.current_msg.bad_word_count > 1:
-            words = Template(multiple_bad_words).substitute(words=", ".join(self.current_msg.BAD_WORDS))
+        if self.profane_word_count == 1:
+            words = Template(singular_bad_word).substitute(word=self.profanity[0])
+        elif self.profane_word_count > 1:
+            words = Template(multiple_bad_words).substitute(words=", ".join(self.profanity))
 
         followup = random.choice(funny_followups)
 
@@ -113,20 +129,3 @@ class Profanity:
             bad_words=words,
             followup=followup
         )
-
-    @property
-    def current_msg(self):
-        return self._current_message
-
-    @current_msg.setter
-    def current_msg(self, discord_message):
-        if type(discord_message) is not discord.Message:
-            raise TypeError("Current message is not of a discord type")
-
-        self._current_message = Message()
-        self._current_message.VALUE = discord_message
-        self._current_message.WORDS = [word for word in discord_message.content.split(' ')]
-        self._current_message.WORDS_LOWER = Message.split_message(discord_message.content)
-        self._current_message.CHANNEL = discord_message.channel
-        self._current_message.AUTHOR = discord_message.author
-        self.check()

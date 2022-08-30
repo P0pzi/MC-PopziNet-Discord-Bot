@@ -16,7 +16,7 @@ assert os.getenv('MC_SERVER_PORT')
 client = discord.Client()
 
 # Initialize profanity module
-profanity = Profanity()
+profanity_module = Profanity()
 
 
 # If an on_ready() event is called, say we're ready
@@ -33,15 +33,16 @@ async def on_message(message):
     if message.author == client.user:
         return  # Return nothing. Ignore it.
 
-    # Update the current message for the profanity module to scan
-    profanity.current_msg = message
+    profanity_module\
+        .reset()\
+        .set_message(message)\
+        .check()
 
-    if profanity.current_msg.is_profane:
+    if profanity_module.has_profane_words:
         await message.delete()
-        await message.author.send(profanity.get_message_reply())
+        await message.author.send(profanity_module.get_message_reply())
 
-    # If it was a message sent in the #suggestions room
-    # (Room ID 705786147200303104) add reactions to it
+    # If it was a message sent in the #suggestions room add reactions to it
     if message.channel.id == ChatRooms.SUGGESTIONS.value:
         await message.add_reaction('\N{THUMBS UP SIGN}')
         await message.add_reaction('\N{THUMBS DOWN SIGN}')

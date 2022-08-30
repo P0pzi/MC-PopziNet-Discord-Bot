@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from models.message import Message
 from modules.profanity import Profanity
+from tests.mocks import MockMessage
 
 sentences_test = [
     # Sentence, is bad sentence
@@ -19,8 +19,20 @@ sentences_test = [
 
 
 class ProfanityTests(TestCase):
+
+    profanity_module = Profanity()
+
     def test_all_sentences_on_badness(self):
         for (sentence, isBad) in sentences_test:
-            message_words = Message.split_message(sentence)
-            bad_words = Profanity.get_profanity(message_words)
-            self.assertEqual(len(bad_words) > 0, isBad, sentence)
+
+            self.profanity_module.reset()
+            self.profanity_module.set_message(
+                MockMessage(sentence)
+            )
+            self.profanity_module.check()
+
+            self.assertEqual(
+                self.profanity_module.has_profane_words,
+                isBad,
+                sentence
+            )
