@@ -12,7 +12,7 @@ sentences_test = [
     ("You look like a fuckhead", True),
     ("You need an assfuck", True),
     ("You fUckER!!!!", True),
-    ("awww crap!", True),
+    ("awww crap!", False),
     ("cunt", True),
     ("A$$fucker", True)
 ]
