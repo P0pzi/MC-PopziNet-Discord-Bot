@@ -10,8 +10,12 @@ from static.rooms import ChatRooms
 
 
 class PoopzClient(discord.Client):
-    def __init__(self, *, intents: Intents, **options: Any):
+    def __init__(self, **options: Any):
+        intents = discord.Intents.default()
+        intents.message_content = True
+
         super().__init__(intents=intents, **options)
+
         self.profanity_module = Profanity()
 
     async def on_ready(self):
