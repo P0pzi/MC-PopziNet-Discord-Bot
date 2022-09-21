@@ -3,7 +3,6 @@ from typing import Any
 import os
 import mcping
 import discord
-from discord import Intents
 
 from modules.profanity import Profanity
 from static.rooms import ChatRooms
