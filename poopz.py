@@ -41,23 +41,23 @@ class PoopzClient(discord.Client):
             await message.add_reaction('\N{THUMBS UP SIGN}')
             await message.add_reaction('\N{THUMBS DOWN SIGN}')
 
-            # If a message is sent to our ingame channel
-            if message.channel.id == ChatRooms.INGAME.value:
+        # If a message is sent to our ingame channel
+        if message.channel.id == ChatRooms.INGAME.value:
 
-                # If the message starts with !online or !list
-                if message.content.startswith('!online') or message.content.startswith('!list'):
-                    # Ping the server to query player info
-                    ping = mcping.ping(os.getenv('MC_SERVER_IP'), int(os.getenv('MC_SERVER_PORT')))
+            # If the message starts with !online or !list
+            if message.content.startswith('!online') or message.content.startswith('!list'):
+                # Ping the server to query player info
+                ping = mcping.ping(os.getenv('MC_SERVER_IP'), int(os.getenv('MC_SERVER_PORT')))
 
-                    # Change the <Players> to <Strings>
-                    names = [player.name for player in ping.players]
+                # Change the <Players> to <Strings>
+                names = [player.name for player in ping.players]
 
-                    # Create an embed message and send it
-                    embedded = discord.Embed(
-                        title="Online Players - Mc.Popzi.Net",
-                        description="\n".join(names), color=0x00ff00
-                    )
-                    await message.channel.send(embed=embedded)
+                # Create an embed message and send it
+                embedded = discord.Embed(
+                    title="Online Players - Mc.Popzi.Net",
+                    description="\n".join(names), color=0x00ff00
+                )
+                await message.channel.send(embed=embedded)
 
         # If a message is sent to our screenshots channel
         if message.channel.id == ChatRooms.SCREENSHOTS.value:
