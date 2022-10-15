@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from modules.profanity import Profanity
+from modules.profanity import ProfanityModule
 from tests.mocks import MockMessage
 
 sentences_test = [
@@ -20,7 +20,7 @@ sentences_test = [
 
 class ProfanityTests(TestCase):
 
-    profanity_module = Profanity()
+    profanity_module = ProfanityModule()
 
     def test_all_sentences_on_badness(self):
         for (sentence, isBad) in sentences_test:

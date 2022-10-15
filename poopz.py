@@ -4,7 +4,9 @@ import os
 import mcping
 import discord
 
-from modules.profanity import Profanity
+from modules.mute import MuteModule
+from modules.profanity import ProfanityModule
+from modules.strike import StrikeModule
 from static.rooms import ChatRooms
 
 
@@ -15,7 +17,9 @@ class PoopzClient(discord.Client):
 
         super().__init__(intents=intents, **options)
 
-        self.profanity_module = Profanity()
+        self.profanity_module = ProfanityModule()
+        self.mute_module = MuteModule()
+        self.strike_module = StrikeModule(self.mute_module)
 
     async def on_ready(self):
         print(f'We have logged on as {self.user}!')
@@ -25,14 +29,34 @@ class PoopzClient(discord.Client):
         if message.author == self.user:
             return  # Return nothing. Ignore it.
 
+        # print(f'{message.author} in {message.channel} said {message.content}')
+        # if message.channel.id == ChatRooms.MOD_DEVELOPMENT_BOT.value:
+        #     await message.channel.send(f'Hello, {message.author.display_name}')
+
         self.profanity_module\
             .reset()\
             .set_message(message)\
             .check()
 
+        if self.mute_module.get(message.author.id).is_muted:
+            return await message.delete()
+
         if self.profanity_module.has_profane_words:
             await message.delete()
-            await message.author.send(self.profanity_module.get_message_reply())
+
+            muted = self.strike_module.strike(message.author.id)
+            if muted:
+                muted_person = self.mute_module.get(message.author.id)
+                minutes_muted = round(muted_person.seconds_muted / 60)
+                await message.author.send(
+                    f"""
+                        You have been muted for {minutes_muted} minutes for excessive use of profanity. 
+                        Keep it clean in the future.
+                    """
+                )
+            else:
+                await message.author.send(self.profanity_module.get_message_reply())
+
             # Can return here, nothing else to do with the message.
             return
 
