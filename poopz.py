@@ -29,10 +29,6 @@ class PoopzClient(discord.Client):
         if message.author == self.user:
             return  # Return nothing. Ignore it.
 
-        # print(f'{message.author} in {message.channel} said {message.content}')
-        # if message.channel.id == ChatRooms.MOD_DEVELOPMENT_BOT.value:
-        #     await message.channel.send(f'Hello, {message.author.display_name}')
-
         self.profanity_module\
             .reset()\
             .set_message(message)\
@@ -54,6 +50,14 @@ class PoopzClient(discord.Client):
                         Keep it clean in the future.
                     """
                 )
+
+                admin_channel = self.get_channel(ChatRooms.MOD_CHAT.value)
+                await admin_channel.send(
+                    f"""
+                    {message.author.display_name} has been muted for {minutes_muted} minutes for excessive use of profanity. 
+                    """
+                )
+
             else:
                 await message.author.send(self.profanity_module.get_message_reply())
 
