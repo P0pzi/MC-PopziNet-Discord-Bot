@@ -25,7 +25,7 @@ funny_followups = [
 ]
 
 
-class Profanity:
+class ProfanityModule:
     # Chat won't be checked in these rooms
     IGNORE_ROOMS = [
         ChatRooms.MOD_CHAT.value,
@@ -58,11 +58,11 @@ class Profanity:
         cleaned_sentence_part = split_cleanup_sentence(lowercase_sentence)
         return list(set(cleaned_sentence_part))
 
-    def set_message(self, message: [discord.Message, MockMessage]) -> "Profanity":
+    def set_message(self, message: [discord.Message, MockMessage]) -> "ProfanityModule":
         self.message = message
         return self
 
-    def reset(self) -> "Profanity":
+    def reset(self) -> "ProfanityModule":
         self.message = None
         self.profanity = []
         return self
@@ -75,8 +75,8 @@ class Profanity:
         """
 
         if self.message.channel.id != ChatRooms.MOD_DEVELOPMENT_BOT.value and (
-                self.message.channel.id in Profanity.IGNORE_ROOMS
-                or self.message.author.id in Profanity.IGNORE_USERS
+                self.message.channel.id in ProfanityModule.IGNORE_ROOMS
+                or self.message.author.id in ProfanityModule.IGNORE_USERS
         ):
             return
 
@@ -117,15 +117,17 @@ class Profanity:
             # Something is wrong with the code if someone sees this.
             return "Your message is clean. Good job."
 
-        words = ""
-        if self.profane_word_count == 1:
-            words = Template(singular_bad_word).substitute(word=self.profanity[0])
-        elif self.profane_word_count > 1:
-            words = Template(multiple_bad_words).substitute(words=", ".join(self.profanity))
-
-        followup = random.choice(funny_followups)
-
         return Template(badwords_message).substitute(
-            bad_words=words,
-            followup=followup
+            bad_words=self.get_profane_words(),
+            followup=ProfanityModule.get_follow_up()
         )
+
+    @staticmethod
+    def get_follow_up():
+        return random.choice(funny_followups)
+
+    def get_profane_words(self):
+        if self.profane_word_count == 1:
+            return Template(singular_bad_word).substitute(word=self.profanity[0])
+
+        return Template(multiple_bad_words).substitute(words=", ".join(self.profanity))
