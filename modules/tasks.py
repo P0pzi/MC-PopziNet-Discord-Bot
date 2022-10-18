@@ -2,7 +2,6 @@ import json
 import threading
 
 import time
-import schedule
 import yaml
 import os.path
 from datetime import datetime
@@ -100,10 +99,9 @@ class TaskModule:
 
     # Make sure this runs in a separate thread, as it's blocking
     def runner(self):
-        schedule.every(1).minute.do(self.handle_run)
         while True:
-            schedule.run_pending()
-            time.sleep(30)
+            self.handle_run()
+            time.sleep(60)
 
     def start(self):
         if not self.TASK_THREAD:
