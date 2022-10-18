@@ -24,7 +24,7 @@ task_module.add_runnable('run', runnable_method)
 
 # Runs in one minute from now
 task_module.add_task(Task(
-    'test',
+    'test 1',
     'run',
     datetime.datetime.now() + timedelta(minutes=1),
     json.dumps(['World 2'])
@@ -32,7 +32,7 @@ task_module.add_task(Task(
 
 # Runs right away, as it should already have been run
 task_module.add_task(Task(
-    'test',
+    'test 2',
     'run',
     datetime.datetime.now() - timedelta(minutes=1),
     json.dumps(['World 1'])
