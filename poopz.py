@@ -1,10 +1,10 @@
+from datetime import datetime, timedelta
 from typing import Any
 
 import os
 import mcping
 import discord
 
-from modules.mute import MuteModule
 from modules.profanity import ProfanityModule
 from modules.strike import StrikeModule
 from static.rooms import ChatRooms
@@ -18,8 +18,7 @@ class PoopzClient(discord.Client):
         super().__init__(intents=intents, **options)
 
         self.profanity_module = ProfanityModule()
-        self.mute_module = MuteModule()
-        self.strike_module = StrikeModule(self.mute_module)
+        self.strike_module = StrikeModule()
 
     async def on_ready(self):
         print(f'We have logged on as {self.user}!')
@@ -34,16 +33,14 @@ class PoopzClient(discord.Client):
             .set_message(message)\
             .check()
 
-        if self.mute_module.get(message.author.id).is_muted:
-            return await message.delete()
-
         if self.profanity_module.has_profane_words:
             await message.delete()
 
             muted = self.strike_module.strike(message.author.id)
             if muted:
-                muted_person = self.mute_module.get(message.author.id)
-                minutes_muted = round(muted_person.seconds_muted / 60)
+                muted_person = self.strike_module.get(message.author.id)
+                minutes_muted = round(muted_person.next_mute_time / 60)
+                await message.author.timeout(discord.utils.utcnow() + timedelta(minutes=minutes_muted))
                 await message.author.send(
                     f"""
                         You have been muted for {minutes_muted} minutes for excessive use of profanity. 
