@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Any
+from mcstatus import JavaServer
 
 import os
-import mcping
 import discord
 
 from modules.profanity import ProfanityModule
@@ -67,21 +67,24 @@ class PoopzClient(discord.Client):
             await message.add_reaction('\N{THUMBS DOWN SIGN}')
 
         # If a message is sent to our ingame channel
-        if message.channel.id == ChatRooms.INGAME.value:
+        if message.channel.id == ChatRooms.INGAME.value or message.channel.id == ChatRooms.MOD_DEVELOPMENT_BOT.value:
 
             # If the message starts with !online or !list
             if message.content.startswith('!online') or message.content.startswith('!list'):
-                # Ping the server to query player info
-                ping = mcping.ping(os.getenv('MC_SERVER_IP'), int(os.getenv('MC_SERVER_PORT')))
 
-                # Change the <Players> to <Strings>
-                names = [player.name for player in ping.players]
+                server = JavaServer.lookup(os.getenv('MC_SERVER_IP') + ":" + os.getenv('MC_SERVER_PORT'))
+                status = server.status()
+                query = server.query()
 
                 # Create an embed message and send it
-                embedded = discord.Embed(
-                    title="Online Players - Mc.Popzi.Net",
-                    description="\n".join(names), color=0x00ff00
-                )
+                embedded = discord.Embed(title="Online Players - Mc.Popzi.Net", color=0x00ff00)
+                embedded.add_field(name="Online", value="{0}/{1}".format(status.players.online, status.players.max))
+                embedded.add_field(name="RT", value="{0}ms".format(round(status.latency, 2)))
+                embedded.add_field(name="Version", value="{0} ({1})".format(status.version.name, status.version.protocol))
+                embedded.add_field(name="Players", value="\n".join(query.players.names))
+                embedded.timestamp = datetime.now()
+                embedded.set_thumbnail(url="https://i.imgur.com/QKzkLzr.png")  # Todo: Move to popzi.net
+
                 await message.channel.send(embed=embedded)
 
         # If a message is sent to our screenshots channel
