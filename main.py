@@ -6,7 +6,7 @@ from poopz import PoopzClient
 
 # Ensure Environmental variables are set
 load_dotenv()
-assert os.getenv('CLIENT_SECRET')
+assert os.getenv('DISCORD_BOT_SECRET')
 assert os.getenv('MC_SERVER_IP')
 assert os.getenv('MC_SERVER_PORT')
 
@@ -16,4 +16,4 @@ def runnable_method(one_arg):
 
 
 poopz = PoopzClient()
-poopz.run(os.getenv('CLIENT_SECRET'))
+poopz.run(os.getenv('DISCORD_BOT_SECRET'))
