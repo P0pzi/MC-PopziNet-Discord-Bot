@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 from mcstatus import JavaServer
 
 import os
 from discord.ext import commands
-from discord import Intents, Embed
+from discord import Intents, Embed, utils
 
 from modules.profanity import ProfanityModule
 from modules.strike import StrikeModule
@@ -37,27 +37,27 @@ class PoopzClient(commands.Bot):
         if self.profanity_module.has_profane_words:
             await message.delete()
 
-            # muted = self.strike_module.strike(message.author.id)
-            # if muted:
-            #     muted_person = self.strike_module.get(message.author.id)
-            #     minutes_muted = round(muted_person.next_mute_time / 60)
-            #     await message.author.timeout(discord.utils.utcnow() + timedelta(minutes=minutes_muted))
-            #     await message.author.send(
-            #         f"""
-            #             You have been muted for {minutes_muted} minutes for excessive use of profanity.
-            #             Keep it clean in the future.
-            #         """
-            #     )
-            #
-            #     admin_channel = self.get_channel(ChatRooms.MOD_CHAT.value)
-            #     await admin_channel.send(
-            #         f"""
-            #         {message.author.display_name} has been muted for {minutes_muted} minutes for excessive use of profanity.
-            #         """
-            #     )
+            muted = self.strike_module.strike(message.author.id)
+            if muted:
+                muted_person = self.strike_module.get(message.author.id)
+                minutes_muted = round(muted_person.next_mute_time / 60)
+                await message.author.timeout(utils.utcnow() + timedelta(minutes=minutes_muted))
+                await message.author.send(
+                    f"""
+                        You have been muted for {minutes_muted} minutes for excessive use of profanity.
+                        Keep it clean in the future.
+                    """
+                )
 
-            # else:
-            await message.author.send(self.profanity_module.get_message_reply())
+                admin_channel = self.get_channel(ChatRooms.MOD_CHAT.value)
+                await admin_channel.send(
+                    f"""
+                    {message.author.display_name} has been muted for {minutes_muted} minutes for excessive use of profanity.
+                    """
+                )
+
+            else:
+                await message.author.send(self.profanity_module.get_message_reply())
 
             # Can return here, nothing else to do with the message.
             return
