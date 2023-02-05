@@ -1,3 +1,5 @@
+import asyncio
+
 from datetime import datetime, timedelta
 from typing import Any
 from mcstatus import JavaServer
@@ -64,8 +66,10 @@ class PoopzClient(commands.Bot):
 
         # If it was a message sent in the #suggestions room add reactions to it
         if message.channel.id == ChatRooms.SUGGESTIONS.value:
-            await message.add_reaction('\N{THUMBS UP SIGN}')
-            await message.add_reaction('\N{THUMBS DOWN SIGN}')
+            await asyncio.gather(
+                message.add_reaction('\N{THUMBS UP SIGN}'),
+                message.add_reaction('\N{THUMBS DOWN SIGN}')
+            )
 
         # If a message is sent to our ingame channel
         if message.channel.id == ChatRooms.INGAME.value or message.channel.id == ChatRooms.MOD_DEVELOPMENT_BOT.value:
