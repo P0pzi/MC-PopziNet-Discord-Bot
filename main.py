@@ -15,9 +15,5 @@ for env in expected_envs:
     print("Loaded OS Env:", env + '=' + os.getenv(env))
 
 
-def runnable_method(one_arg):
-    print(f'Hello, {one_arg}')
-
-
 poopz = PoopzClient()
 poopz.run(os.getenv('DISCORD_BOT_SECRET'))
