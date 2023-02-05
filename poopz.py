@@ -4,6 +4,7 @@ from mcstatus import JavaServer
 
 import os
 import discord
+from discord import Embed
 
 from modules.profanity import ProfanityModule
 from modules.strike import StrikeModule
@@ -37,6 +38,9 @@ class PoopzClient(discord.Client):
             await message.delete()
 
             muted = self.strike_module.strike(message.author.id)
+            embedded_message = Embed()
+            embedded_message.add_field(name='Message', value=message.content)
+
             if muted:
                 muted_person = self.strike_module.get(message.author.id)
                 minutes_muted = round(muted_person.next_mute_time / 60)
@@ -45,7 +49,8 @@ class PoopzClient(discord.Client):
                     f"""
                         You have been muted for {minutes_muted} minutes for excessive use of profanity. 
                         Keep it clean in the future.
-                    """
+                    """,
+                    embed=embedded_message
                 )
 
                 admin_channel = self.get_channel(ChatRooms.MOD_CHAT.value)
@@ -56,7 +61,7 @@ class PoopzClient(discord.Client):
                 )
 
             else:
-                await message.author.send(self.profanity_module.get_message_reply())
+                await message.author.send(self.profanity_module.get_message_reply(), embed=embedded_message)
 
             # Can return here, nothing else to do with the message.
             return
