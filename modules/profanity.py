@@ -11,6 +11,9 @@ from tests.mocks import MockMessage
 bad_words = open("./static/badwords.txt", "r").read().splitlines()
 bad_words = [word.lower() for word in bad_words]
 
+whitelist = open("./static/whitelist.txt", "r").read().splitlines()
+whitelist = [word.lower() for word in whitelist]
+
 badwords_message = "Please keep the chat clean ($bad_words), else $followup... \N{SERIOUS FACE WITH SYMBOLS COVERING MOUTH}"
 singular_bad_word = "Bad word: $word"
 multiple_bad_words = "Bad words: $words"
@@ -56,7 +59,13 @@ class ProfanityModule:
     def unique_words(self) -> list:
         lowercase_sentence = self.message.content.lower()
         cleaned_sentence_part = split_cleanup_sentence(lowercase_sentence)
-        return list(set(cleaned_sentence_part))
+
+        unique_words_list = list(set(cleaned_sentence_part))
+
+        return [
+            word for word in unique_words_list
+            if word not in whitelist
+        ]
 
     def set_message(self, message: [discord.Message, MockMessage]) -> "ProfanityModule":
         self.message = message
@@ -83,12 +92,10 @@ class ProfanityModule:
         self.profanity = self.get_profanity()
 
     def get_profanity(self) -> list:
-        found_profanity = [
+        return [
             profane_word.removeprefix("*").removesuffix("*") for profane_word in bad_words
             if self.is_profane_word_in_message(profane_word)
         ]
-
-        return list(set(found_profanity))
 
     def is_profane_word_in_message(self, profane_word: str) -> bool:
         """

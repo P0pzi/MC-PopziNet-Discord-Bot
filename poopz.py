@@ -1,21 +1,24 @@
+import asyncio
+
 from datetime import datetime, timedelta
 from typing import Any
 from mcstatus import JavaServer
 
 import os
-import discord
+from discord.ext import commands
+from discord import Intents, Embed, utils
 
 from modules.profanity import ProfanityModule
 from modules.strike import StrikeModule
 from static.rooms import ChatRooms
 
 
-class PoopzClient(discord.Client):
+class PoopzClient(commands.Bot):
     def __init__(self, **options: Any):
-        intents = discord.Intents.default()
+        intents = Intents.default()
         intents.message_content = True
 
-        super().__init__(intents=intents, **options)
+        super().__init__(command_prefix="!", intents=intents, **options)
 
         self.profanity_module = ProfanityModule()
         self.strike_module = StrikeModule()
@@ -37,34 +40,40 @@ class PoopzClient(discord.Client):
             await message.delete()
 
             muted = self.strike_module.strike(message.author.id)
+            embedded_message = Embed()
+            embedded_message.add_field(name='Message', value=message.content)
+
             if muted:
                 muted_person = self.strike_module.get(message.author.id)
                 minutes_muted = round(muted_person.next_mute_time / 60)
-                await message.author.timeout(discord.utils.utcnow() + timedelta(minutes=minutes_muted))
+                await message.author.timeout(utils.utcnow() + timedelta(minutes=minutes_muted))
                 await message.author.send(
                     f"""
-                        You have been muted for {minutes_muted} minutes for excessive use of profanity. 
+                        You have been muted for {minutes_muted} minutes for excessive use of profanity.
                         Keep it clean in the future.
-                    """
+                    """,
+                    embed=embedded_message
                 )
 
                 admin_channel = self.get_channel(ChatRooms.MOD_CHAT.value)
                 await admin_channel.send(
                     f"""
-                    {message.author.display_name} has been muted for {minutes_muted} minutes for excessive use of profanity. 
+                    {message.author.display_name} has been muted for {minutes_muted} minutes for excessive use of profanity.
                     """
                 )
 
             else:
-                await message.author.send(self.profanity_module.get_message_reply())
+                await message.author.send(self.profanity_module.get_message_reply(), embed=embedded_message)
 
             # Can return here, nothing else to do with the message.
             return
 
         # If it was a message sent in the #suggestions room add reactions to it
         if message.channel.id == ChatRooms.SUGGESTIONS.value:
-            await message.add_reaction('\N{THUMBS UP SIGN}')
-            await message.add_reaction('\N{THUMBS DOWN SIGN}')
+            await asyncio.gather(
+                message.add_reaction('\N{THUMBS UP SIGN}'),
+                message.add_reaction('\N{THUMBS DOWN SIGN}')
+            )
 
         # If a message is sent to our ingame channel
         if message.channel.id == ChatRooms.INGAME.value or message.channel.id == ChatRooms.MOD_DEVELOPMENT_BOT.value:
@@ -77,7 +86,7 @@ class PoopzClient(discord.Client):
                 query = server.query()
 
                 # Create an embed message and send it
-                embedded = discord.Embed(title="Online Players - Mc.Popzi.Net", color=0x00ff00)
+                embedded = Embed(title="Online Players - Mc.Popzi.Net", color=0x00ff00)
                 embedded.add_field(name="Online", value="{0}/{1}".format(status.players.online, status.players.max))
                 embedded.add_field(name="RT", value="{0}ms".format(round(status.latency, 2)))
                 embedded.add_field(name="Version", value="{0} ({1})".format(status.version.name, status.version.protocol))
@@ -97,3 +106,4 @@ class PoopzClient(discord.Client):
                     'and feast on your body. \N{POULTRY LEG}\N{FORK AND KNIFE}'
                 )
 
+        await self.process_commands(message)

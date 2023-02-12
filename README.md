@@ -29,7 +29,7 @@ The discord bot used by the Popzi.Net Minecraft discord channel
 
 1. Images > Build a new image
    1. Name: `example-image-name`
-   2. URL: `https://github.com/P0pzi/MC-PopziNet-Discord-Bot/docker`
+   2. URL: `https://github.com/P0pzi/MC-PopziNet-Discord-Bot/tree/main/docker`
 2. Containers > Add Container
    1. Name: `example-container-name`
    2. Image:  `example-image-name:latest`
