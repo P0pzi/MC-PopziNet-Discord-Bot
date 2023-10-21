@@ -1,14 +1,13 @@
 import asyncio
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any
-from mcstatus import JavaServer
 
-import os
 from discord.ext import commands
 from discord import Intents, Embed, utils
 
 from modules.profanity import ProfanityModule
+from modules.status import check_online_status
 from modules.strike import StrikeModule
 from static.rooms import ChatRooms
 
@@ -19,6 +18,9 @@ class PoopzClient(commands.Bot):
         intents.message_content = True
 
         super().__init__(command_prefix="!", intents=intents, **options)
+        # Make status commands
+        for name in ['status', 'list', 'online']:
+            self.command(name=name, pass_context=True)(check_online_status)
 
         self.profanity_module = ProfanityModule()
         self.strike_module = StrikeModule()
@@ -74,27 +76,6 @@ class PoopzClient(commands.Bot):
                 message.add_reaction('\N{THUMBS UP SIGN}'),
                 message.add_reaction('\N{THUMBS DOWN SIGN}')
             )
-
-        # If a message is sent to our ingame channel
-        if message.channel.id == ChatRooms.INGAME.value or message.channel.id == ChatRooms.MOD_DEVELOPMENT_BOT.value:
-
-            # If the message starts with !online or !list
-            if message.content.startswith('!online') or message.content.startswith('!list'):
-
-                server = JavaServer.lookup(os.getenv('MC_SERVER_IP') + ":" + os.getenv('MC_SERVER_PORT'))
-                status = server.status()
-                query = server.query()
-
-                # Create an embed message and send it
-                embedded = Embed(title="Online Players - Mc.Popzi.Net", color=0x00ff00)
-                embedded.add_field(name="Online", value="{0}/{1}".format(status.players.online, status.players.max))
-                embedded.add_field(name="RT", value="{0}ms".format(round(status.latency, 2)))
-                embedded.add_field(name="Version", value="{0} ({1})".format(status.version.name, status.version.protocol))
-                embedded.add_field(name="Players", value="\n".join(query.players.names))
-                embedded.timestamp = datetime.now()
-                embedded.set_thumbnail(url="https://i.imgur.com/QKzkLzr.png")  # Todo: Move to popzi.net
-
-                await message.channel.send(embed=embedded)
 
         # If a message is sent to our screenshots channel
         if message.channel.id == ChatRooms.SCREENSHOTS.value:
